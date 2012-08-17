@@ -25,3 +25,20 @@ class TableEnumTest(unittest.TestCase):
 
             thing = Thing()
             self.assertItemsEqual(thing.valid_values, ['red', 'blue'])
+
+    def test_multiple_fetches_call_htables_only_once(self):
+        from flatkit import ValuesFromTable
+
+        class Thing(object):
+            valid_values = ValuesFromTable('person', field='slug')
+
+        thing = Thing()
+
+        with self.app.test_request_context():
+            person_table = self.ht.session['person']
+            person_table.create_table()
+            person_table.new(slug='red')
+            thing.valid_values
+            person_table.new(slug='blue')
+
+            self.assertItemsEqual(thing.valid_values, ['red'])
