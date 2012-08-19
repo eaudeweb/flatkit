@@ -1,12 +1,12 @@
 import unittest
 import flask
 import flask_htables
+from flatkit.testing import FlaskTestCase
 
 
-class TableEnumTest(unittest.TestCase):
+class TableEnumTest(FlaskTestCase):
 
     def setUp(self):
-        self.app = flask.Flask(__name__)
         self.app.config.update(HTABLES_ENGINE='sqlite',
                                HTABLES_SQLITE_PATH=':memory:')
         self.ht = flask_htables.HTables(self.app)
