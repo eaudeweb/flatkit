@@ -13,5 +13,5 @@ distutils.core.setup(
     version='dev',
     author='Eau de Web',
     author_email='office@eaudeweb.ro',
-    py_modules=['flatkit'],
+    packages=['flatkit'],
 )
