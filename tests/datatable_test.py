@@ -1,6 +1,33 @@
 import unittest
 import flask
+import flask.views
 from flatkit.testing import FlaskTestCase
+
+
+class DataTablesFilterView(flask.views.View):
+
+    def filter_data(self, offset, limit):
+        data = [
+            {'n': "1", 'name': "flask", 'language': "python"},
+            {'n': "2", 'name': "django", 'language': "python"},
+            {'n': "3", 'name': "zope", 'language': "python"},
+            {'n': "4", 'name': "sinatra", 'language': "ruby"},
+            {'n': "5", 'name': "rails", 'language': "ruby"},
+            {'n': "6", 'name': "merb", 'language': "ruby"},
+        ]
+        end = offset + limit
+        return data[offset:end]
+
+    def dispatch_request(self):
+        args = flask.request.args
+        columns = args['sColumns'].split(',')
+        offset = args.get('iDisplayStart', 0, type=int)
+        limit = args.get('iDisplayLength', 10, type=int)
+        table_data = [[row.get(key) for key in columns]
+                      for row in self.filter_data(offset, limit)]
+        return flask.jsonify({
+            'aaData': table_data,
+        })
 
 
 class TableEnumTest(FlaskTestCase):
@@ -10,26 +37,8 @@ class TableEnumTest(FlaskTestCase):
         return flask.json.loads(resp.data)
 
     def setUp(self):
-        data = [
-            {'n': "1", 'name': "flask", 'language': "python"},
-            {'n': "2", 'name': "django", 'language': "python"},
-            {'n': "3", 'name': "zope", 'language': "python"},
-            {'n': "4", 'name': "sinatra", 'language': "ruby"},
-            {'n': "5", 'name': "rails", 'language': "ruby"},
-            {'n': "6", 'name': "merb", 'language': "ruby"},
-        ]
-        @self.app.route('/filter')
-        def table_filter():
-            args = flask.request.args
-            columns = args['sColumns'].split(',')
-            window_offset = args.get('iDisplayStart', 0, type=int)
-            window_limit = args.get('iDisplayLength', 10, type=int)
-            window_end = window_offset + window_limit
-            table_data = [[row.get(key) for key in columns] for row in data]
-            table_data = table_data[window_offset:window_end]
-            return flask.jsonify({
-                'aaData': table_data,
-            })
+        table_filter = DataTablesFilterView.as_view('table_filter')
+        self.app.route('/filter')(table_filter)
         self.client = self.app.test_client()
 
     def test_filter_with_columns_returns_only_those_columns(self):
