@@ -55,18 +55,23 @@ class TableEnumTest(FlaskTestCase):
             ["4", "sinatra"],
         ])
 
+    def test_view_returns_count_of_full_collection(self):
+        resp = self.client.get('/filter?sColumns=n,name')
+        resp_data = self.from_json(resp)
+        self.assertEqual(resp_data['iTotalRecords'], 6)
+
     def test_view_sends_kwargs_to_filter(self):
         from flatkit.datatables import FilterView
-        call_args = []
 
         class MyFilterView(FilterView):
 
-            def filter_data(self, offset, limit, name):
-                call_args.append(name)
-                return []
+            def filter_data(self, offset=0, limit=None, name=''):
+                return [{'msg': "my name is %s" % name}]
+
+            def count_data(self, offset=0, limit=None, name=None):
+                assert name is not None
 
         view = MyFilterView.as_view('some_filter')
         self.app.add_url_rule('/<string:name>/filter', view_func=view)
-        self.client.get('/red/filter?sColumns=')
-        self.client.get('/blue/filter?sColumns=')
-        self.assertEqual(call_args, ['red', 'blue'])
+        resp_data = self.from_json(self.client.get('/red/filter?sColumns=msg'))
+        self.assertEqual(resp_data['aaData'], [['my name is red']])
