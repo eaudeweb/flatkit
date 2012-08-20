@@ -1,33 +1,16 @@
 import unittest
 import flask
-import flask.views
 from flatkit.testing import FlaskTestCase
 
 
-class DataTablesFilterView(flask.views.View):
-
-    def filter_data(self, offset, limit):
-        data = [
-            {'n': "1", 'name': "flask", 'language': "python"},
-            {'n': "2", 'name': "django", 'language': "python"},
-            {'n': "3", 'name': "zope", 'language': "python"},
-            {'n': "4", 'name': "sinatra", 'language': "ruby"},
-            {'n': "5", 'name': "rails", 'language': "ruby"},
-            {'n': "6", 'name': "merb", 'language': "ruby"},
-        ]
-        end = offset + limit
-        return data[offset:end]
-
-    def dispatch_request(self):
-        args = flask.request.args
-        columns = args['sColumns'].split(',')
-        offset = args.get('iDisplayStart', 0, type=int)
-        limit = args.get('iDisplayLength', 10, type=int)
-        table_data = [[row.get(key) for key in columns]
-                      for row in self.filter_data(offset, limit)]
-        return flask.jsonify({
-            'aaData': table_data,
-        })
+DATA = [
+    {'n': "1", 'name': "flask", 'language': "python"},
+    {'n': "2", 'name': "django", 'language': "python"},
+    {'n': "3", 'name': "zope", 'language': "python"},
+    {'n': "4", 'name': "sinatra", 'language': "ruby"},
+    {'n': "5", 'name': "rails", 'language': "ruby"},
+    {'n': "6", 'name': "merb", 'language': "ruby"},
+]
 
 
 class TableEnumTest(FlaskTestCase):
@@ -37,7 +20,8 @@ class TableEnumTest(FlaskTestCase):
         return flask.json.loads(resp.data)
 
     def setUp(self):
-        table_filter = DataTablesFilterView.as_view('table_filter')
+        from flatkit.datatables import FilterView
+        table_filter = FilterView.as_view('table_filter', data=DATA)
         self.app.route('/filter')(table_filter)
         self.client = self.app.test_client()
 
