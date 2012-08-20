@@ -4,12 +4,8 @@ import flask.views
 
 class FilterView(flask.views.View):
 
-    def __init__(self, data=[]):
-        self.data = data
-
-    def filter_data(self, offset=0, limit=None):
-        end = None if limit is None else offset + limit
-        return self.data[offset:end]
+    def filter_data(self, offset, limit):
+        raise NotImplementedError
 
     def count_data(self, **kwargs):
         return len(list(self.filter_data(**kwargs)))

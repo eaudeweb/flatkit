@@ -21,7 +21,17 @@ class TableEnumTest(FlaskTestCase):
 
     def setUp(self):
         from flatkit.datatables import FilterView
-        table_filter = FilterView.as_view('table_filter', data=DATA)
+
+        class MockFilterView(FilterView):
+
+            def __init__(self, data=[]):
+                self.data = data
+
+            def filter_data(self, offset=0, limit=None):
+                end = None if limit is None else offset + limit
+                return self.data[offset:end]
+
+        table_filter = MockFilterView.as_view('table_filter', data=DATA)
         self.app.route('/filter')(table_filter)
         self.client = self.app.test_client()
 
