@@ -54,3 +54,19 @@ class TableEnumTest(FlaskTestCase):
             ["3", "zope"],
             ["4", "sinatra"],
         ])
+
+    def test_view_sends_kwargs_to_filter(self):
+        from flatkit.datatables import FilterView
+        call_args = []
+
+        class MyFilterView(FilterView):
+
+            def filter_data(self, offset, limit, name):
+                call_args.append(name)
+                return []
+
+        view = MyFilterView.as_view('some_filter')
+        self.app.add_url_rule('/<string:name>/filter', view_func=view)
+        self.client.get('/red/filter?sColumns=')
+        self.client.get('/blue/filter?sColumns=')
+        self.assertEqual(call_args, ['red', 'blue'])
