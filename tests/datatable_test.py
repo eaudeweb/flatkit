@@ -59,6 +59,7 @@ class TableEnumTest(FlaskTestCase):
         resp = self.client.get('/filter?sColumns=n,name')
         resp_data = self.from_json(resp)
         self.assertEqual(resp_data['iTotalRecords'], 6)
+        self.assertEqual(resp_data['iTotalDisplayRecords'], 6)
 
     def test_view_sends_kwargs_to_filter(self):
         from flatkit.datatables import FilterView

@@ -21,7 +21,9 @@ class FilterView(flask.views.View):
         limit = args.get('iDisplayLength', 10, type=int)
         table_data = [[row.get(key) for key in columns]
                       for row in self.filter_data(offset, limit, **kwargs)]
+        count_total = self.count_data(**kwargs)
         return flask.jsonify({
-            'iTotalRecords': self.count_data(**kwargs),
+            'iTotalRecords': count_total,
+            'iTotalDisplayRecords': count_total,
             'aaData': table_data,
         })
