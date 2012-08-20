@@ -8,7 +8,7 @@ class FilterView(flask.views.View):
         raise NotImplementedError
 
     def count_data(self, **kwargs):
-        return len(list(self.filter_data(**kwargs)))
+        return len(list(self.filter_data(0, None, **kwargs)))
 
     def dispatch_request(self, **kwargs):
         args = flask.request.args

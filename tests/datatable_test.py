@@ -27,7 +27,7 @@ class TableEnumTest(FlaskTestCase):
             def __init__(self, data=[]):
                 self.data = data
 
-            def filter_data(self, offset=0, limit=None):
+            def filter_data(self, offset, limit):
                 end = None if limit is None else offset + limit
                 return self.data[offset:end]
 
