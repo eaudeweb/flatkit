@@ -26,6 +26,21 @@ class TableEnumTest(FlaskTestCase):
             thing = Thing()
             self.assertItemsEqual(thing.valid_values, ['red', 'blue'])
 
+    def test_primary_keys_fetched_from_database_as_list(self):
+        from flatkit.schema import ValuesFromTable
+
+        class Thing(object):
+            valid_values = ValuesFromTable('person')
+
+        with self.app.test_request_context():
+            person_table = self.ht.session['person']
+            person_table.create_table()
+            person_table.new(slug='red')
+            person_table.new(slug='blue')
+
+            thing = Thing()
+            self.assertItemsEqual(thing.valid_values, [1, 2])
+
     def test_multiple_fetches_call_htables_only_once(self):
         from flatkit.schema import ValuesFromTable
 

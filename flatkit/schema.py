@@ -9,7 +9,7 @@ def get_request_cache():
 
 class ValuesFromTable(object):
 
-    def __init__(self, table, field):
+    def __init__(self, table, field=None):
         self.table = table
         self.field = field
 
@@ -18,8 +18,11 @@ class ValuesFromTable(object):
         key = (self,)
         if key not in cache:
             session = flask.current_app.extensions['htables'].session
-            ret = [row[self.field] for row in
-                   session[self.table].find()]
+            if self.field is None:
+                get_value = lambda row: row.id
+            else:
+                get_value = lambda row: row.get(self.field)
+            ret = [get_value(row) for row in session[self.table].find()]
             cache[key] = ret
         return cache[key]
 
