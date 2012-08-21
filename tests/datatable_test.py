@@ -27,7 +27,9 @@ class TableEnumTest(FlaskTestCase):
             def __init__(self, data=[]):
                 self.data = data
 
-            def filter_data(self, offset, limit):
+            def filter_data(self, options):
+                offset = options['offset']
+                limit = options['limit']
                 end = None if limit is None else offset + limit
                 return self.data[offset:end]
 
@@ -76,10 +78,10 @@ class TableEnumTest(FlaskTestCase):
 
         class MyFilterView(FilterView):
 
-            def filter_data(self, offset=0, limit=None, name=''):
+            def filter_data(self, options, name=''):
                 return [{'msg': "my name is %s" % name}]
 
-            def count_data(self, offset=0, limit=None, name=None):
+            def count_data(self, options, name=None):
                 assert name is not None
 
         view = MyFilterView.as_view('some_filter')
