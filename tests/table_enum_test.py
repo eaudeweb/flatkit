@@ -57,3 +57,18 @@ class TableEnumTest(FlaskTestCase):
 
             thing = Thing()
             self.assertItemsEqual(thing.value_labels, {'red': "Color Red"})
+
+    def test_dict_fetched_from_database_with_primary_key_as_key(self):
+        from flatkit.schema import DictFromTable
+
+        class Thing(object):
+            value_labels = DictFromTable('person', value_field='label')
+
+        with self.app.test_request_context():
+            person_table = self.ht.session['person']
+            person_table.create_table()
+            person_table.new(label="Red")
+            person_table.new(label="Blue")
+
+            thing = Thing()
+            self.assertItemsEqual(thing.value_labels, {1: "Red", 2: "Blue"})
