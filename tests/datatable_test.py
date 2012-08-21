@@ -30,8 +30,10 @@ class TableEnumTest(FlaskTestCase):
             def filter_data(self, options):
                 offset = options['offset']
                 limit = options['limit']
+                search = options['search']
                 end = None if limit is None else offset + limit
-                return self.data[offset:end]
+                filtered = [d for d in self.data if search in d['name']]
+                return filtered[offset:end]
 
         table_filter = MockFilterView.as_view('table_filter', data=DATA)
         self.app.route('/filter')(table_filter)
@@ -88,3 +90,21 @@ class TableEnumTest(FlaskTestCase):
         self.app.add_url_rule('/<string:name>/filter', view_func=view)
         resp_data = self.from_json(self.client.get('/red/filter?sColumns=msg'))
         self.assertEqual(resp_data['aaData'], [['my name is red']])
+
+    def test_string_search_returns_filtered_results(self):
+        resp = self.client.get('/filter?sColumns=n,name'
+                                      '&sSearch=ra')
+        resp_data = self.from_json(resp)
+        self.assertEqual(resp_data['aaData'], [
+            ["4", "sinatra"],
+            ["5", "rails"],
+        ])
+
+    def test_limited_string_search_returns_good_total_and_partial_counts(self):
+        resp = self.client.get('/filter?sColumns=n,name'
+                                      '&sSearch=ra'
+                                      '&iDisplayLength=1')
+        resp_data = self.from_json(resp)
+        self.assertEqual(resp_data['iTotalRecords'], 6)
+        self.assertEqual(resp_data['iTotalDisplayRecords'], 2)
+        self.assertEqual(len(resp_data['aaData']), 1)
