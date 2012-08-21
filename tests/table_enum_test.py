@@ -12,7 +12,7 @@ class TableEnumTest(FlaskTestCase):
         self.ht = flask_htables.HTables(self.app)
 
     def test_two_values_fetched_from_database(self):
-        from flatkit import ValuesFromTable
+        from flatkit.schema import ValuesFromTable
 
         class Thing(object):
             valid_values = ValuesFromTable('person', field='slug')
@@ -27,7 +27,7 @@ class TableEnumTest(FlaskTestCase):
             self.assertItemsEqual(thing.valid_values, ['red', 'blue'])
 
     def test_multiple_fetches_call_htables_only_once(self):
-        from flatkit import ValuesFromTable
+        from flatkit.schema import ValuesFromTable
 
         class Thing(object):
             valid_values = ValuesFromTable('person', field='slug')
