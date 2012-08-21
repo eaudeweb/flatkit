@@ -4,35 +4,34 @@ import flask.views
 
 class FilterView(flask.views.View):
 
-    def filter_data(self, options, **kwargs):
+    def query(self, options, **kwargs):
         raise NotImplementedError
-
-    def count_data(self, options, **kwargs):
-        return len(list(self.filter_data(options, **kwargs)))
 
     def dispatch_request(self, **kwargs):
         args = flask.request.args
         columns = args['sColumns'].split(',')
-        limit = {
+        get_rows = {
             'offset': args.get('iDisplayStart', 0, type=int),
             'limit': args.get('iDisplayLength', 10, type=int),
+            'count': False,
         }
-        nolimit = {
+        get_limit = {
             'offset': 0,
             'limit': None,
+            'count': True,
         }
-        filter_ = {
+        with_filter = {
             'search': args.get('sSearch', ''),
         }
-        nofilter = {
+        no_filter = {
             'search': '',
         }
 
         table_data = [[row.get(key) for key in columns] for row in
-                      self.filter_data(dict(filter_, **limit), **kwargs)]
+                      self.query(dict(with_filter, **get_rows), **kwargs)]
 
-        count_filtered = self.count_data(dict(filter_, **nolimit), **kwargs)
-        count_total = self.count_data(dict(nofilter, **nolimit), **kwargs)
+        count_filtered = self.query(dict(with_filter, **get_limit), **kwargs)
+        count_total = self.query(dict(no_filter, **get_limit), **kwargs)
 
         return flask.jsonify({
             'iTotalRecords': count_total,

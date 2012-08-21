@@ -27,13 +27,18 @@ class TableEnumTest(FlaskTestCase):
             def __init__(self, data=[]):
                 self.data = data
 
-            def filter_data(self, options):
+            def query(self, options):
                 offset = options['offset']
                 limit = options['limit']
                 search = options['search']
+                count = options['count']
                 end = None if limit is None else offset + limit
                 filtered = [d for d in self.data if search in d['name']]
-                return filtered[offset:end]
+                result = filtered[offset:end]
+                if count:
+                    return len(result)
+                else:
+                    return iter(result)
 
         table_filter = MockFilterView.as_view('table_filter', data=DATA)
         self.app.route('/filter')(table_filter)
@@ -80,11 +85,11 @@ class TableEnumTest(FlaskTestCase):
 
         class MyFilterView(FilterView):
 
-            def filter_data(self, options, name=''):
-                return [{'msg': "my name is %s" % name}]
-
-            def count_data(self, options, name=None):
+            def query(self, options, name=None):
                 assert name is not None
+                if options['count']:
+                    return 1
+                return [{'msg': "my name is %s" % name}]
 
         view = MyFilterView.as_view('some_filter')
         self.app.add_url_rule('/<string:name>/filter', view_func=view)
