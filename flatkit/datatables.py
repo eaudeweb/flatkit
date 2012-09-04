@@ -22,10 +22,18 @@ class FilterView(flask.views.View):
         }
         with_filter = {
             'search': args.get('sSearch', ''),
+            'order_by': (),
         }
         no_filter = {
             'search': '',
         }
+
+        number_of_sorting_cols = args.get('iSortingCols', 0, type=int)
+        if number_of_sorting_cols > 0:
+            columns = args['sColumns'].split(',')
+            column = columns[args.get('iSortCol_0', 0, type=int)]
+            direction = args.get('sSortDir_0', 'asc', type=str)
+            with_filter['order_by'] = (column, direction)
 
         table_data = [[row.get(key) for key in columns] for row in
                       self.query(dict(with_filter, **get_rows), **kwargs)]
