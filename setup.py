@@ -10,7 +10,7 @@ distutils.core.setup(
     name='flatkit',
     url='http://github.com/eaudeweb/flatkit/',
     description=summary,
-    version='dev',
+    version='0.1',
     author='Eau de Web',
     author_email='office@eaudeweb.ro',
     packages=['flatkit'],
